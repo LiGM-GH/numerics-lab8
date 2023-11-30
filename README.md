@@ -63,3 +63,5 @@ u' = 2x - 5
 u'' = 2
 -2 - 2 x + 5 = -2x + 3
 ```
+
+## Looking for approximate answer with accuracy of ε = 0.001
