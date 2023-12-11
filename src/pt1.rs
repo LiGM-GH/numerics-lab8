@@ -1,6 +1,6 @@
 use error_stack::{Result, ResultExt};
 use ndarray::{Array1, Array2, Dim, ShapeBuilder};
-use ndarray_linalg::Solve;
+use ndarray_linalg::{Solve, Norm};
 use std::f64::consts::E;
 
 use crate::error::SomeError;
@@ -10,27 +10,26 @@ mod consts {
 }
 
 pub fn main() -> Result<(), SomeError> {
+    let steps_number = 500;
     let start = 0.0;
     let end = 3.0;
 
-    let values = make_values(start, end, (10, 10));
+    let values = make_values(start, end, (steps_number, steps_number));
 
-    println!("{}", values);
+    // println!("{}", values);
 
-    let rhs = make_rhs(start, end, 10);
+    let rhs = make_rhs(start, end, steps_number);
 
-    println!("{}", rhs);
+    // println!("{}", rhs);
 
     let answer: Array1<_> = values
         .solve_into(rhs)
         .map_err(|err| error_stack::report!(err))
         .change_context::<SomeError>(SomeError)?;
 
-    println!("{answer}");
+    let real_y = make_real_y(start, end, steps_number);
 
-    let real_y = make_real_y(start, end, 10);
-
-    println!("{}", real_y);
+    println!("{:?}", (real_y - answer).into_iter().max_by(f64::total_cmp));
 
     Ok(())
 }
@@ -86,7 +85,7 @@ fn make_rhs(start: f64, end: f64, shape: impl ShapeBuilder<Dim = Dim<[usize; 1]>
 
     let len = rhs.shape()[0];
     for value in rhs.iter_mut().skip(1) {
-        *value = h.powi(2) * f(start + h * i as f64);
+        *value = h.powi(2) * f(start + h * i as f64) * f64::exp(start + h * i as f64);
 
         i += 1;
     }
