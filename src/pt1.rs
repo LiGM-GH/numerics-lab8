@@ -1,6 +1,7 @@
 use error_stack::{Result, ResultExt};
 use ndarray::{Array1, Array2, Dim, ShapeBuilder};
-use ndarray_linalg::{Solve, Norm};
+use ndarray_linalg::Solve;
+use plotters::prelude::*;
 use std::f64::consts::E;
 
 use crate::error::SomeError;
@@ -29,7 +30,104 @@ pub fn main() -> Result<(), SomeError> {
 
     let real_y = make_real_y(start, end, steps_number);
 
-    println!("{:?}", (real_y - answer).into_iter().max_by(f64::total_cmp));
+    // println!("{:?}", (real_y - answer).into_iter().max_by(f64::total_cmp));
+
+    {
+        let root = BitMapBackend::new("./images/pt1.png", (800, 800)).into_drawing_area();
+
+        root.fill(&WHITE).change_context(SomeError)?;
+
+        let mut chart = ChartBuilder::on(&root)
+            .x_label_area_size(20)
+            .y_label_area_size(50)
+            .build_cartesian_2d(0.0..3.0, 0.0..5.0)
+            .change_context(SomeError)
+            .attach_printable("Chart couldn't be built")?;
+
+        let h = (end - start) / steps_number as f64;
+
+        chart
+            .draw_series(LineSeries::new(
+                real_y
+                    .iter()
+                    .enumerate()
+                    .map(|(i, y)| (start + h * i as f64, *y)),
+                &RED,
+            ))
+            .change_context(SomeError)
+            .attach_printable("Couldn't draw real_y")?
+            .label("Real y")
+            .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &RED));
+
+        chart
+            .draw_series(LineSeries::new(
+                answer
+                    .iter()
+                    .enumerate()
+                    .map(|(i, y)| (start + h * i as f64, *y)),
+                &GREEN,
+            ))
+            .change_context(SomeError)
+            .attach_printable("Couldn't draw answer")?
+            .label("Answer")
+            .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &GREEN));
+
+        chart.configure_mesh().draw().change_context(SomeError)?;
+
+        chart
+            .configure_series_labels()
+            .background_style(&BLACK.mix(0.1))
+            .draw()
+            .change_context(SomeError)?;
+
+        root.present().change_context(SomeError)?;
+    }
+
+    let mut diff = real_y - answer;
+    diff.mapv_inplace(|val| val.abs());
+
+    {
+        let root = BitMapBackend::new("./images/pt1_diff.png", (800, 800)).into_drawing_area();
+
+        root.fill(&WHITE).change_context(SomeError)?;
+
+        let mut chart = ChartBuilder::on(&root)
+            .x_label_area_size(20)
+            .y_label_area_size(50)
+            .build_cartesian_2d(0.0..3.0, 0.0..0.0001)
+            .change_context(SomeError)
+            .attach_printable("Chart couldn't be built")?;
+
+        let h = (end - start) / steps_number as f64;
+
+        chart
+            .draw_series(LineSeries::new(
+                diff.iter().enumerate().filter_map(|(i, y)| {
+                    // if *y != 0.0 {
+                        Some((start + h * i as f64, *y))
+                    // } else {
+                    //     None
+                    // }
+                }),
+                &BLUE,
+            ))
+            .change_context(SomeError)
+            .attach_printable("Couldn't draw diff")?
+            .label("diff")
+            .legend(|(x, y)| PathElement::new([(x, y), (x + 20, y)], &BLUE));
+
+        chart.configure_mesh().draw().change_context(SomeError)?;
+
+        chart
+            .configure_series_labels()
+            .background_style(&BLACK.mix(0.1))
+            .draw()
+            .change_context(SomeError)?;
+
+        root.present().change_context(SomeError)?;
+
+        println!("{}", diff.into_iter().max_by(f64::total_cmp).unwrap());
+    }
 
     Ok(())
 }

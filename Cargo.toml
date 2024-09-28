@@ -10,3 +10,18 @@ clap = { version = "4.4.10", features = ["derive"] }
 error-stack = "0.4.1"
 ndarray = "0.15.6"
 ndarray-linalg = { version = "0.16.0", features = ["openblas-static"] }
+plotters = "0.3.5"
+
+# [workspace.metadata.cross.target.x86_64-pc-windows-gnu]
+# # Install libssl-dev:arm64, see <https://github.com/cross-rs/cross/blob/main/docs/custom_images.md#adding-dependencies-to-existing-images>
+# pre-build = [
+#     "dpkg --add-architecture i386",
+#     "apt update",
+#     "apt install libssl-dev clang"
+#     # "apt install clang libssl-dev:i386",
+# ]
+
+# [workspace.metadata.cross.target.armv7-unknown-linux-gnueabi]
+# image = "my/image:latest"
+# [workspace.metadata.cross.build]
+# env.volumes = ["A_DIRECTORY=/path/to/volume"]
