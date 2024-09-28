@@ -9,7 +9,7 @@
 +---+---+-----+---+----------+------+-----+
 
 Find solituon for
-```math
+```
   _
  /  -u'' + pu' + qu = f(x), x ∈ (a, b)
 -|  u(a) = Ua,
@@ -22,7 +22,7 @@ My problem:
  \_ u(4) = 0
 ```
 ### Analytical solution:
-```math
+```
 Ackshually, the solution is:
 u = 2 * e³ / (e³ - 1) * e^(-x) - 2 / (e^3 - 1) - 2x² + 6x
 ```
