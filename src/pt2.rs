@@ -8,10 +8,17 @@ mod consts {
     const EPSILON: f64 = 0.1;
 }
 
-use plotters::prelude::*;
+use plotters::{prelude::*, style::register_font};
 use test_case::{f, real_y};
 
 pub fn main() -> Result<(), SomeError> {
+    register_font(
+        "sans-serif",
+        FontStyle::Normal,
+        include_bytes!("../ComicMono.ttf"),
+    )
+    .map_err(|_| SomeError)?;
+
     let start = 0.0;
     let end = 3.0;
     let steps_number = 1002;
@@ -52,7 +59,7 @@ pub fn main() -> Result<(), SomeError> {
         .max_by(f64::total_cmp);
     println!("Error: {:?}", error);
 
-    let root = BitMapBackend::new("./images/pt2_test_case.png", (800, 800)).into_drawing_area();
+    let root = SVGBackend::new("./images/pt2_test_case.png", (800, 800)).into_drawing_area();
 
     root.fill(&WHITE).change_context(SomeError)?;
 
@@ -67,10 +74,12 @@ pub fn main() -> Result<(), SomeError> {
 
     chart
         .draw_series(LineSeries::new(
-            answer
-                .iter()
-                .enumerate()
-                .map(|(i, y)| (start + h * i as f64, (*y - real_y(start + h * i as f64)).abs())),
+            answer.iter().enumerate().map(|(i, y)| {
+                (
+                    start + h * i as f64,
+                    (*y - real_y(start + h * i as f64)).abs(),
+                )
+            }),
             &GREEN,
         ))
         .change_context(SomeError)

@@ -1,7 +1,7 @@
 use error_stack::{Result, ResultExt};
 use ndarray::{Array1, Array2, Dim, ShapeBuilder};
 use ndarray_linalg::Solve;
-use plotters::prelude::*;
+use plotters::{prelude::*, style::register_font};
 use std::f64::consts::E;
 
 use crate::error::SomeError;
@@ -14,6 +14,12 @@ pub fn main() -> Result<(), SomeError> {
     let steps_number = 500;
     let start = 0.0;
     let end = 3.0;
+    register_font(
+        "sans-serif",
+        FontStyle::Normal,
+        include_bytes!("../ComicMono.ttf"),
+    )
+    .map_err(|_| SomeError)?;
 
     let values = make_values(start, end, (steps_number, steps_number));
 
@@ -33,7 +39,7 @@ pub fn main() -> Result<(), SomeError> {
     // println!("{:?}", (real_y - answer).into_iter().max_by(f64::total_cmp));
 
     {
-        let root = BitMapBackend::new("./images/pt1.png", (800, 800)).into_drawing_area();
+        let root = SVGBackend::new("./images/pt1.svg", (800, 800)).into_drawing_area();
 
         root.fill(&WHITE).change_context(SomeError)?;
 
@@ -87,7 +93,7 @@ pub fn main() -> Result<(), SomeError> {
     diff.mapv_inplace(|val| val.abs());
 
     {
-        let root = BitMapBackend::new("./images/pt1_diff.png", (800, 800)).into_drawing_area();
+        let root = SVGBackend::new("./images/pt1_diff.svg", (800, 800)).into_drawing_area();
 
         root.fill(&WHITE).change_context(SomeError)?;
 
@@ -104,7 +110,7 @@ pub fn main() -> Result<(), SomeError> {
             .draw_series(LineSeries::new(
                 diff.iter().enumerate().filter_map(|(i, y)| {
                     // if *y != 0.0 {
-                        Some((start + h * i as f64, *y))
+                    Some((start + h * i as f64, *y))
                     // } else {
                     //     None
                     // }
